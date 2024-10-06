@@ -5,15 +5,31 @@ namespace App\Http\Controllers;
 use App\Models\Student;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class StudentController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
+        try {
+            $students = Student::all();
+
+            return response()->json([
+                'message' => 'Students retrieved successfully.',
+                'students' => $students
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error('Error retrieving students: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to retrieve students. Please try again later.'
+            ], 500);
+        }
     }
 
     /**
