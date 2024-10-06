@@ -6,6 +6,7 @@ use App\Models\Student;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -64,9 +65,27 @@ class StudentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Student $student)
+    public function show(int $id): JsonResponse
     {
-        //
+        try {
+            $student = Student::findOrFail($id);
+
+            return response()->json([
+                'message' => 'Student retrieved successfully.',
+                'student' => $student
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Student not found.'
+            ], 404);
+
+        } catch (Exception $e) {
+            Log::error('Error retrieving student: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to retrieve student. Please try again later.'
+            ], 500);
+        }
     }
 
     /**
