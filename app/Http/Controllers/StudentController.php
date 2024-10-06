@@ -35,9 +35,29 @@ class StudentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreStudentRequest $request)
+    public function store(StoreStudentRequest $request): JsonResponse
     {
-        //
+        try {
+            $fields = $request->validate([
+                'name' => 'required|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'contact_num' => 'nullable|string|max:15',
+                'email' => 'required|email|unique:students,email',
+            ]);
+
+            $student = Student::create($fields);
+
+            return response()->json([
+                'message' => 'Student created successfully.',
+                'student' => $student
+            ], 201);
+
+        } catch (Exception $e) {
+            Log::error('Error creating student: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to create student. Please try again later.'
+            ], 500);
+        }
     }
 
     /**
