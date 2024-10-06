@@ -91,9 +91,35 @@ class StudentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateStudentRequest $request, Student $student)
+    public function update(Request $request, int $id): JsonResponse
     {
-        //
+        try {
+            $fields = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'address' => 'sometimes|nullable|string|max:255',
+                'contact_num' => 'sometimes|nullable|string|max:15',
+                'email' => 'sometimes|required|email|unique:students,email,' . $id,
+            ]);
+
+            $student = Student::findOrFail($id);
+            $student->update($fields);
+
+            return response()->json([
+                'message' => 'Student updated successfully.',
+                'student' => $student
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Student not found.'
+            ], 404);
+
+        } catch (Exception $e) {
+            Log::error('Error updating student: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to update student. Please try again later.'
+            ], 500);
+        }
     }
 
     /**
